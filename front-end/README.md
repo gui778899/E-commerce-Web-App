@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project is a web application that serves as an e-commerce platform. The frontend is developed using React in a Single Page Application (SPA) architecture and interacts with a backend API for data processing and storage. The source code for the backend can be found at [Backend Repository](https://github.coventry.ac.uk/sousagoncj/webAPIdev).
+This project is a web application that serves as an e-commerce platform. The frontend is developed using React in a Single Page Application (SPA) architecture and interacts with a backend API for data processing and storage. The source code for the backend can be found at Backend Repository.
 
 
 
