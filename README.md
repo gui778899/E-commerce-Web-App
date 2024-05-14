@@ -17,7 +17,6 @@
 - [Security](#security)
 - [Testing](#testing)
 - [Database Structure and Population](#database-structure-and-population)
-- [Contribution Guidelines](#contribution-guidelines)
 - [Conclusion](#conclusion)
 
 
