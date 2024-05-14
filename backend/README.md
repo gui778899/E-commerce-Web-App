@@ -1,7 +1,7 @@
 # Backend 6003CEM Web API Development
 
 ## Introduction
-This repository includes a RESTful API backend for an e-commerce store, developed using Node.js and the Koa framework. It's part of a full-stack application, designed to be integrated with a [frontend application](https://github.coventry.ac.uk/sousagoncj/front_end_web_app_api) to create a complete web application.
+This repository includes a RESTful API backend for an e-commerce store, developed using Node.js and the Koa framework. It's part of a full-stack application, designed to be integrated with a frontend application to create a complete web application.
 
 ## Features
 - **User Management**: Registration, login, profile management.
@@ -21,7 +21,7 @@ This repository includes a RESTful API backend for an e-commerce store, develope
 The API documentation is provided in OpenAPI format and is available under the `public` directory. The `openapi.yaml` file contains detailed information about all the API endpoints, including their parameters, request and response schemas, and authentication requirements. 
 
 ### To view and interact with the API documentation:
-1. Ensure that both the [frontend](https://github.coventry.ac.uk/sousagoncj/front_end_web_app_api) and the backend servers are running.
+1. Ensure that both the frontend and the backend servers are running.
 2. Open your web browser and navigate to [http://localhost:5001/api-docs](http://localhost:5001/api-docs). This will load the OpenAPI documentation interface, allowing you to explore and test the various API endpoints directly from the browser.
 
 ## API Endpoints
