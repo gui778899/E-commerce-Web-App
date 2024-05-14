@@ -1,0 +1,60 @@
+/* AdminDashboard.css */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Align content to the top */
+    height: 100vh; /* Full view height */
+    padding-top: 50px; /* Spacing from top */
+  }
+  
+  .dashboard-header {
+    margin: 0; /* Remove default margin */
+  }
+  
+
+  
+  .product-table {
+    margin-top: 30px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 50px;
+  }
+  
+  .product-table th,
+  .product-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .product-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .product-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+
+
+  .manage {
+    position: absolute;
+    top: 10px; 
+    right: 10px;
+    cursor: pointer;
+    font-size: 60px; 
+  }
+  
+
+  .material-symbols-outlined.add{ 
+    position: absolute;
+    top: 10px; 
+    right: 100px;
+    cursor: pointer;
+    font-size: 60px; 
+  }
+
+  .add-product-form{ 
+    margin-top: 50px;
+  }

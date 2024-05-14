@@ -1,0 +1,55 @@
+/* Register.css */
+.register-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 40px);
+  margin-top: 20px;
+}
+
+.register-form {
+  width: 100%;
+  max-width: 400px; /* Or whatever maximum width desire */
+}
+
+.auth-button, .back-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  text-transform: uppercase;
+  cursor: pointer;
+  width: 100%; /* This will make the button take the full width of the form */
+  max-width: 400px; /* Match this to the form's max-width */
+  margin-top: 10px; /* Provide some spacing between elements */
+}
+
+.auth-button:hover, .back-button:hover {
+  background-color: #0056b3;
+}
+
+/* Add this to make the 'Back to Sign In' button stick to the bottom */
+.App {
+  position: relative; /* This is necessary for absolute positioning to work inside */
+}
+
+.back-button {
+  position: absolute;
+  bottom: 10px; /* Adjust as necessary */
+  left: 50%;
+  transform: translateX(-50%); /* This will center the button */
+}
+
+.registration-status {
+  color: #28a745; /* Green for success messages */
+  margin-bottom: 1em;
+}
+
+/* If you want to differentiate between success and error messages */
+.registration-status.error {
+  color: #dc3545; /* Red for error messages */
+}
+
+

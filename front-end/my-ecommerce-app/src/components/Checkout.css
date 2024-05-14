@@ -1,0 +1,81 @@
+
+.material-symbols-outlined.profile {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    position: absolute;
+    top: 20px; /* Adjust as needed */
+    right: 10px; /* Adjust as needed */
+    cursor: pointer;
+    /* Add other styles if needed */
+  }
+
+
+.payment-details-form { 
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+.material-symbols-outlined.back {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 48px; /* Set a specific size for your icon */
+    cursor: pointer;
+    z-index: 10; /* Ensure it's above other elements */
+    width: 48px; /* Set a specific width */
+    height: 48px; /* Set a specific height */
+    display: flex; /* To center the content */
+    align-items: center; /* Aligns vertically */
+    justify-content: center; /* Aligns horizontally */
+  }
+
+
+  .voucher-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50; /* Green color or any suitable color */
+    color: white;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+    max-width: 200px;
+    margin-top: 10px;
+    margin-left: 20px;
+  }
+  
+  .finalize-checkout-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #7e1212; /* Red color */
+    color: white;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 100px; /* Creates space between the buttons */
+    display: block; /* Ensures the button takes the full width */
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+
+  .voucher-message {
+    margin-top: 50px; /* Adjust spacing above the message */
+    font-size: 22px; /* Adjust font size as needed */
+    color: #000000; /* Adjust text color as needed */ /* Center the text */
+    font-weight: bold; /* Make text bold */
+  }
+
+  .voucher-input {
+    padding: 8px 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px; /* Space below the input box */
+    max-width: 200px;
+  }
+
+  .total-amount{ 
+    text-align: center;
+    margin-top: 20px;
+  }

@@ -1,0 +1,145 @@
+h1.welcome-title {
+  text-align: center;
+  color: #000000; /* Change color as needed */
+  font-size: 40px; /* Adjust font size as needed */
+  margin-bottom: 50px; /* Adjust margin as needed */
+}
+.page-content {
+  margin: 0 auto; /* This centers the content horizontally */
+  padding: 20px; /* Optional: adds some padding around the content */
+}
+
+.page-header {
+  text-align: center;
+  position: relative; /* Changed from absolute to relative */
+  width: 100%; /* Ensure it spans the full width */
+  padding: 20px 0; /* Added padding to space out header */
+  box-sizing: border-box; 
+  top: 0/* Ensure padding doesn't affect the total width */
+}
+.logout-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  text-transform: uppercase;
+  cursor: pointer;
+  max-width: 100px;
+  margin-top: 10px;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.logout-button:hover {
+  background-color: #bb2525;
+}
+
+
+  
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 10px;
+  padding: 20px;
+  margin-top: 50px;
+  margin: auto;
+  max-width: calc(100vw - 100px);
+}
+  
+  
+  
+
+
+  .page-container {
+    position: relative; 
+    color:black;
+    text-decoration: none;
+  }
+
+  .cart-button-container {
+    position: absolute; /* Keeps the cart container positioned absolutely within the header */
+    top: 20px; /* Adjust as needed */
+    right: 90px; /* Adjust as needed */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+  }
+  
+  .material-symbols-outlined {
+    font-size: 60px; /* Adjust the size of the cart icon */
+    color: black;
+  }
+  
+  .cart-count {
+    position: absolute;
+    top: -10px; /* Position the count above the cart icon */
+    right: -10px; /* Position the count to the right of the cart icon */
+    background-color: red;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    z-index: 1;
+  }
+
+
+
+.action-button {
+  padding: 10px 20px; /* Adjust padding to your preference */
+  border: none;
+  border-radius: 4px;
+  background-color: #7e1212; /* Blue background */
+  color: white; /* White text for better readability */
+  cursor: pointer;
+  margin-top: 10px; /* Space from the product details */
+  text-transform: uppercase; /* Optional: makes text uppercase */
+  font-weight: bold; /* Optional: makes the font bold */
+  display: inline-block; /* Allows you to set padding and margin */
+  text-decoration: none; /* Removes underline */
+}
+
+.remove-button {
+  padding: 10px 5px; /* Adjust padding to your preference */
+  border: none;
+  border-radius: 8px;
+  background-color: #7e1212; /* Blue background */
+  color: white; /* White text for better readability */
+  cursor: pointer;
+  margin-top: 10px;
+  margin-left: 10px; /* Space from the product details */
+  text-transform: uppercase; /* Optional: makes text uppercase */
+  font-weight: bold; /* Optional: makes the font bold */
+  display: inline-block; /* Allows you to set padding and margin */
+  text-decoration: none; /* Removes underline */
+}
+
+.product-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Optional: adds shadow for depth */
+  text-decoration: none; /* Removes the underline from links */
+  color: black; 
+  text-decoration: none;
+  
+}
+
+
+
+/* Override link styles for the product card, specifically the add to cart text and icons */
+.product-card a{ /* targeting links directly within the product card */
+  color: black; /* Set your desired color */
+  text-decoration: none; /* Remove underline from links */
+}
+
+

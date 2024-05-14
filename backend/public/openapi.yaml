@@ -1,0 +1,1917 @@
+openapi: 3.0.0
+info:
+  title: E-commerce Shop API
+  description: This is the API documentation for the E-commerce Shop application. It covers all endpoints used for products, carts, orders, payments, and user management.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Development server
+
+paths:
+  /user:
+    get:
+      summary: Get all users
+      description: Retrieve a paginated list of users. Accessible by admins.
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+          description: Maximum number of users to return at one time.
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: Page number of the user list.
+        - in: query
+          name: fields
+          schema:
+            type: string
+          description: Comma-separated list of fields to include in the response.
+      responses:
+        '200':
+          description: A list of users.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '403':
+          description: Forbidden - the user does not have permission to view this resource.
+        '500':
+          description: Internal server error.
+
+    post:
+      summary: Create a new user
+      description: Public endpoint for user registration.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '201':
+          description: User created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '409':
+          description: Username already exists.
+        '500':
+          description: Internal server error.
+    
+  /user/login:
+    post:
+      summary: Login a user
+      description: Public endpoint for user login.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginCredentials'
+      responses:
+        '200':
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Incorrect username or password.
+        '500':
+          description: Internal server error.
+    
+
+
+
+  /user/{id}:
+    put:
+      summary: Update a user by its id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The user ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                about:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                email:
+                  type: string
+                  format: email
+                avatarURL:
+                  type: string
+                  format: uri
+      responses:
+        '200':
+          description: User updated successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  UserID:
+                    type: integer
+                    example: 1
+                  updated:
+                    type: boolean
+                    example: true
+                  link:
+                    type: string
+                    format: uri
+        '403':
+          description: Forbidden - the user does not have permission to update this user.
+        '404':
+          description: The user with the specified ID was not found.
+        '500':
+          description: Internal server error.
+
+  /user/auth-check:
+    get:
+      summary: Check if the user is authenticated
+      description: >
+        Endpoint to check if the user is authenticated. Returns information about the
+        authentication status and, if authenticated, the user role.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isAuthenticated:
+                    type: boolean
+                    description: Indicates if the user is authenticated.
+                  role:
+                    type: string
+                    description: The role of the authenticated user. Only present if isAuthenticated is true.
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating the user is not authenticated.
+
+  /user/profile:
+    get:
+      summary: Get a single user by their ID
+      description: Retrieves the profile of the currently authenticated user. Access is restricted to the user themselves or an admin.
+      security:
+        - bearerAuth: []  
+      responses:
+        '200':
+          description: User profile data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '304':
+          description: Not Modified (Etag matches)
+        '403':
+          description: Forbidden - User does not have permission to access this profile.
+        '500':
+          description: Internal server error.
+
+    /user/{id}:
+    delete:
+      summary: Delete a user by its ID
+      description: >
+        Deletes a user from the database by its ID. This operation is protected, possibly
+        only allowing administrators to delete users or users to delete their own account.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user to delete.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  UserID:
+                    type: integer
+                    description: The ID of the deleted user.
+                  deleted:
+                    type: boolean
+                    example: true
+                    description: Indicates whether the user was successfully deleted.
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating insufficient permissions.
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating that the user with the specified ID was not found.
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message indicating an internal server error occurred.
+
+  /shippinginformation:
+    post:
+      summary: Create new shipping information for an order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShippingInformationRequest'
+      responses:
+        '201':
+          description: Shipping information created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShippingInformationResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /shippinginformation/{id}:
+    get:
+      summary: Get shipping information by ShippingID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the shipping information to retrieve
+      responses:
+        '200':
+          description: Shipping information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShippingInformationResponse'
+        '404':
+          description: Shipping information not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '403':
+          description: Forbidden - User does not have permission to access the shipping information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /shippinginformation/order/{orderId}:
+    get:
+      summary: Get shipping information for a specific order
+      parameters:
+        - in: path
+          name: orderId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the order to retrieve shipping information for
+      responses:
+        '200':
+          description: Shipping information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShippingInformationResponse'
+        '404':
+          description: No shipping information found for the given order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '403':
+          description: Forbidden - User does not have permission to access the shipping information for the order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    /shippinginformation/{id}:
+    put:
+      summary: Update shipping information by ShippingID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the shipping information to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateShippingInformationRequest'
+      responses:
+        '200':
+          description: Shipping information updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Shipping information not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '403':
+          description: Forbidden - User does not have permission to update the shipping information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete shipping information by ShippingID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: The ID of the shipping information to delete
+      responses:
+        '200':
+          description: Shipping information deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Shipping information not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '403':
+          description: Forbidden - User does not have permission to delete the shipping information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /product/:
+    get:
+      summary: Retrieve all available products
+      responses:
+        '200':
+          description: Successful response with available products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+        '403':
+          description: Forbidden - User does not have permission to read products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /product/{id}:
+    get:
+      summary: Retrieve a specific product by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the product to retrieve
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response with the requested product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '403':
+          description: Forbidden - User does not have permission to read products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+
+    put:
+      summary: Update a specific product by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The ID of the product to update
+          schema:
+            type: integer
+        - in: body
+          name: body
+          required: true
+          description: The fields to update for the product
+          schema:
+            $ref: '#/components/schemas/ProductUpdateRequest'
+      responses:
+        '200':
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '400':
+          description: Bad request - No fields provided for update
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '403':
+          description: Forbidden - User does not have permission to update products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+    post:
+      summary: Add a new product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductAddRequest'
+      responses:
+        '201':
+          description: Product added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductAddResponse'
+        '403':
+          description: Forbidden - User does not have permission to create a product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+    delete:
+      summary: Delete a product by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID of the product to delete
+      responses:
+        '200':
+          description: Product deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDeleteResponse'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '403':
+          description: Forbidden - User does not have permission to delete a product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+
+
+  /payment:
+    post:
+      summary: Create a new payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Payment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentCreateResponse'
+        '400':
+          description: Bad request - Payment could not be created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '403':
+          description: Forbidden - User does not have permission to create payment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    get:
+      summary: Get all payments
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+        '403':
+          description: Forbidden - User does not have permission to get all payments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /payment/{id}:
+    get:
+      summary: Get a payment by PaymentID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: PaymentID
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '403':
+          description: Forbidden - User does not have permission to get payment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Payment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    put:
+      summary: Update a payment by PaymentID
+      parameters:
+        - in: path
+          name: id
+          description: ID of the payment to update
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentUpdate'
+      responses:
+        '200':
+          description: Payment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '403':
+          description: Forbidden - User does not have permission to update payment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Payment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete a payment by PaymentID
+      parameters:
+        - in: path
+          name: id
+          description: ID of the payment to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Payment deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '403':
+          description: Forbidden - User does not have permission to delete payment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Payment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /order/:
+    post:
+      summary: Create a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+      responses:
+        '201':
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateOrderResponse'
+        '400':
+          description: Bad Request - Error in request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - User does not have permission to create an order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+    
+    get:
+      summary: Retrieve all orders
+      responses:
+        '200':
+          description: OK - Orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllOrdersResponse'
+        '403':
+          description: Forbidden - User does not have permission to get orders
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update an existing order by OrderID
+      responses:
+        '200':
+          description: OK - Order updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdatedResponse'
+        '403':
+          description: Forbidden - User does not have permission to update the order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Not Found - No orders found for the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    delete:
+      summary: Delete an order by OrderID
+      responses:
+        '200':
+          description: OK - Order deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '403':
+          description: Forbidden - User does not have permission to delete the order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Not Found - No orders found for the user or order already deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /orderinfo:
+    get:
+      summary: Retrieve a single order by OrderID
+      responses:
+        '200':
+          description: OK - Order retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '403':
+          description: Forbidden - User does not have permission to access the order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Not Found - No order found for the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /cart-items:
+    get:
+      summary: Get all items for a specific cart
+      responses:
+        '200':
+          description: OK - Items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartItem'
+        '403':
+          description: Forbidden - User does not have permission to get the cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Not Found - User's cart not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+
+    post:
+      summary: Add an item to a cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: integer
+                  description: The ID of the product to add to the cart
+                  example: 123
+      responses:
+        '201':
+          description: Created - Item added to cart successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: integer
+                    description: The ID of the inserted cart item
+                    example: 456
+                  message:
+                    type: string
+                    example: Item added to cart successfully
+        '403':
+          description: Forbidden - User does not have permission to add items to this cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Not Found - User's cart not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+  /cart-items/{ItemId}:
+    put:
+      summary: Update a cart item's quantity
+      parameters:
+        - in: path
+          name: ItemId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the cart item to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  description: The updated quantity of the cart item
+                  example: 3
+      responses:
+        '201':
+          description: Created - Item quantity updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: integer
+                    description: The ID of the updated cart item
+                    example: 456
+                  message:
+                    type: string
+                    example: Item quantity updated successfully
+        '403':
+          description: Forbidden - User does not have permission to update this cart item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Not Found - Cart item not found or not associated with the user's cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    delete:
+      summary: Remove an item from a cart
+      parameters:
+        - in: path
+          name: ItemId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the cart item to remove
+      responses:
+        '200':
+          description: OK - Cart item removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Cart item removed successfully
+        '403':
+          description: Forbidden - User does not have permission to delete this cart item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Not Found - Cart item not found or user does not have permission to delete it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /cart:
+    get:
+      summary: Get all carts
+      responses:
+        '200':
+          description: OK - Successfully retrieved all carts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Cart'
+        '403':
+          description: Forbidden - User does not have permission to get carts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      
+    delete:
+      summary: Delete a specific cart
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK - Cart and cart items deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating that the cart and cart items were deleted successfully
+        '403':
+          description: Forbidden - User does not have permission to delete this cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Not Found - Cart not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /cart/user:
+    get:
+      summary: Get a specific user's cart
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK - Successfully retrieved the user's cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cart:
+                    $ref: '#/components/schemas/Cart'
+        '403':
+          description: Forbidden - User does not have permission to create cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Not Found - Cart not found for the specified user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    post:
+      summary: Create a new cart for a user
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Created - Successfully created a new cart for the user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cart_id:
+                    type: integer
+                    description: The ID of the newly created cart
+                  message:
+                    type: string
+                    description: A success message indicating that the cart was created successfully
+        '403':
+          description: Forbidden - User does not have permission to create cart
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+  /address:
+    post:
+      summary: Create a new address for a user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                AddressLine1:
+                  type: string
+                City:
+                  type: string
+                State:
+                  type: string
+                PostalCode:
+                  type: string
+                Country:
+                  type: string
+              required:
+                - AddressLine1
+                - City
+                - State
+                - PostalCode
+                - Country
+      responses:
+        '201':
+          description: Address created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating that the address was created successfully
+                  addressId:
+                    type: integer
+                    description: The ID of the created address
+        '403':
+          description: Forbidden - User does not have permission to create an address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      
+    get:
+      summary: Get all addresses for a specific user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK - Addresses retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Address'
+        '403':
+          description: Forbidden - User does not have permission to view these addresses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+  /address/{id}:
+    get:
+      summary: Get an address by AddressID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the address to retrieve
+          schema:
+            type: integer
+            format: int64
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Address found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+        '403':
+          description: Forbidden - User does not have permission to view this address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '404':
+          description: Address not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+    put:
+      summary: Update an address by AddressID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the address to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressUpdate'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK - Address updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Address updated successfully
+        '404':
+          description: Not Found - The requested address was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '403':
+          description: Forbidden - User does not have permission to update this address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    delete:
+      summary: Delete an address by AddressID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID of the address to delete
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK - Address deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Address deleted successfully
+        '404':
+          description: Not Found - The requested address was not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundResponse'
+        '403':
+          description: Forbidden - User does not have permission to delete this address
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenResponse'
+        '500':
+          description: Internal Server Error - Something went wrong on the server
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+
+
+
+
+
+
+
+
+components:
+  securitySchemes:
+      bearerAuth:   
+        type: http
+        scheme: bearer
+        bearerFormat: JWT  
+        
+  schemas:
+    User:
+      type: object
+      properties:
+        UserID:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        about:
+          type: string
+        dateRegistered:
+          type: string
+          format: date-time
+        avatarURL:
+          type: string
+          format: uri
+        modified:
+          type: string
+          format: date-time
+        AddressLine1:
+          type: string
+        City:
+          type: string
+        State:
+          type: string
+        PostalCode:
+          type: string
+        Country:
+          type: string
+      required:
+        - UserID
+        - username
+        - email
+        - role
+
+
+    NewUser:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+        email:
+          type: string
+          format: email
+      required:
+        - username
+        - password
+        - email
+
+    UserLogin:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    UserUpdateRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        about:
+          type: string
+        password:
+          type: string
+          format: password
+        email:
+          type: string
+          format: email
+        avatarURL:
+          type: string
+          format: uri
+      required:
+        - email  
+
+    UserUpdateResponse:
+      type: object
+      properties:
+        UserID:
+          type: integer
+          example: 1
+        updated:
+          type: boolean
+          example: true
+        link:
+          type: string
+          format: uri
+
+    UserResponse:
+      type: object
+      properties:
+        ID:
+          type: integer
+          format: int64
+          description: Unique identifier of the created user.
+        created:
+          type: boolean
+          description: Indicates whether the user was created successfully.
+        message:
+          type: string
+          description: Message detailing the result of the operation.
+    
+    LoginCredentials:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+      required:
+        - username
+        - password
+    
+    LoginResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Message detailing the result of the operation.
+        user:
+          type: object
+          properties:
+            token:
+              type: string
+              description: Authentication token set in httpOnly cookie.
+            ID:
+              type: integer
+              format: int64
+              description: Unique identifier of the user.
+            username:
+              type: string
+            email:
+              type: string
+              format: email
+            avatarURL:
+              type: string
+              format: uri
+    UserProfile:
+      type: object
+      properties:
+        UserID:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        about:
+          type: string
+        avatarURL:
+          type: string
+        dateRegistered:
+          type: string
+          format: date-time
+        modified:
+          type: string
+          format: date-time
+        AddressLine1:
+          type: string
+        City:
+          type: string
+        State:
+          type: string
+        PostalCode:
+          type: string
+        Country:
+          type: string
+    ShippingInformationRequest:
+      type: object
+      properties:
+        OrderID:
+          type: integer
+          description: The ID of the order associated with the shipping information
+        ShippingStatus:
+          type: string
+          description: The status of the shipping information
+        TrackingNumber:
+          type: string
+          description: The tracking number for the shipment
+        AddressID:
+          type: integer
+          description: The ID of the address associated with the shipping information
+      required:
+        - OrderID
+        - ShippingStatus
+        - TrackingNumber
+        - AddressID
+      example:
+        OrderID: 123
+        ShippingStatus: Processing
+        TrackingNumber: ABC123
+        AddressID: 456
+
+    ShippingInformationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Shipping information created successfully
+        shippingId:
+          type: integer
+          example: 123
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Error message describing the internal server error
+    
+    ForbiddenResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: You do not have permission to access the shipping information
+    
+    NotFoundResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Shipping information not found
+
+
+    ShippingInformation:
+      type: object
+      properties:
+        ShippingID:
+          type: integer
+          description: The ID of the shipping information
+        OrderID:
+          type: integer
+          description: The ID of the associated order
+        ShippingStatus:
+          type: string
+          description: The status of the shipping information
+        TrackingNumber:
+          type: string
+          description: The tracking number for the shipment
+        AddressID:
+          type: integer
+          description: The ID of the associated address
+      example:
+        ShippingID: 123
+        OrderID: 456
+        ShippingStatus: Shipped
+        TrackingNumber: ABC123
+        AddressID: 789
+    
+
+    UpdateShippingInformationRequest:
+      type: object
+      properties:
+        ShippingStatus:
+          type: string
+          description: The updated shipping status
+        TrackingNumber:
+          type: string
+          description: The updated tracking number
+        AddressID:
+          type: integer
+          description: The updated address ID
+      required:
+        - ShippingStatus
+        - TrackingNumber
+        - AddressID
+      example:
+        ShippingStatus: Shipped
+        TrackingNumber: XYZ456
+        AddressID: 123
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Shipping information updated successfully
+    
+
+
+    ProductList:
+      type: array
+      items:
+        $ref: '#/components/schemas/Product'
+    Product:
+      type: object
+      properties:
+        productId:
+          type: integer
+          description: The unique identifier for the product
+        name:
+          type: string
+          description: The name of the product
+        price:
+          type: number
+          description: The price of the product
+
+
+
+    ProductResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Product'
+        message:
+          type: string
+          example: Product retrieved successfully
+    
+    BadRequestResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: No fields provided for update
+    
+    ProductAddRequest:
+      type: object
+      properties:
+        Name:
+          type: string
+          description: The name of the product
+        Description:
+          type: string
+          description: The description of the product
+        Price:
+          type: number
+          description: The price of the product
+        StockQuantity:
+          type: integer
+          description: The stock quantity of the product
+      required:
+        - Name
+        - Description
+        - Price
+        - StockQuantity
+    
+    ProductAddResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Product added successfully
+        productId:
+          type: integer
+          example: 123
+    
+    ProductDeleteResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Product with ProductID 123 deleted successfully
+    
+
+    PaymentCreateResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Payment created successfully
+        paymentId:
+          type: integer
+          example: 123
+
+
+    PaymentResponse:
+      type: object
+
+    Payment:
+      type: object
+
+
+    PaymentUpdate:
+      type: object
+      properties:
+        PaymentMethod:
+          type: string
+        PaymentStatus:
+          type: string
+        PaymentAmount:
+          type: number
+
+    CreateOrderRequest:
+      type: object
+
+    CreateOrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: integer
+          description: The ID of the newly created order
+
+
+    GetAllOrdersResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/Order'
+    Order:
+      type: object
+    
+
+    UpdatedResponse:
+      type: object
+      properties:
+        Rows_affected:
+          type: integer
+          description: Number of rows affected by the update operation
+          example: 1
+    
+    CartItem:
+      type: object
+
+
+    Cart:
+      type: object
+      properties:
+        cartId:
+          type: integer
+          description: The ID of the cart
+        userId:
+          type: integer
+          description: The ID of the user associated with the cart
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time when the cart was created
+    
+    Address:
+      type: object
+      properties:
+        AddressID:
+          type: integer
+        UserID:
+          type: integer
+        AddressLine1:
+          type: string
+        City:
+          type: string
+        State:
+          type: string
+        PostalCode:
+          type: string
+        Country:
+          type: string
+    
+
+    AddressUpdate:
+      type: object
+      properties:
+        AddressLine1:
+          type: string
+        City:
+          type: string
+        State:
+          type: string
+        PostalCode:
+          type: string
+        Country:
+          type: string

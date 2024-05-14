@@ -1,0 +1,53 @@
+.checkout-button{ 
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #7e1212;
+    color: white;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 100px;
+}
+
+
+h1{ 
+    text-align: center;
+    margin-top: 20px;
+}
+
+.total-amount{ 
+    text-align: center;
+    margin-top: 80px;
+}
+
+.back-button{ 
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    text-transform: uppercase;
+    cursor: pointer;
+    width: 100%;
+    max-width: 400px;
+    margin-top: 10px;
+    text-align:center;
+}
+
+
+.material-symbols-outlined.back-to-main {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 48px; /* Set a specific size for your icon */
+    cursor: pointer;
+    z-index: 10; /* Ensure it's above other elements */
+    width: 48px; /* Set a specific width */
+    height: 48px; /* Set a specific height */
+    display: flex; /* To center the content */
+    align-items: center; /* Aligns vertically */
+    justify-content: center; /* Aligns horizontally */
+  }
+  

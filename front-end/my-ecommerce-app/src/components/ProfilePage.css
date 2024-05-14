@@ -1,0 +1,17 @@
+.profile-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(171, 35, 35, 0.529); /* Similar to cart-count background */
+    color: white;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-weight: bold;
+    margin: 10px 0; /* Space between buttons */
+    width: auto; /* Adjust as needed */
+  }
+  
+  .profile-button:hover {
+    background-color: darkred; /* Darker shade on hover */
+  }
+  
